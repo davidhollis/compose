@@ -7,6 +7,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "compose",
     libraryDependencies ++= Seq(
+      "com.typesafe" % "config" % "1.4.0",
       "org.scalatest" %% "scalatest" % "3.1.1" % Test,
     )
   )
