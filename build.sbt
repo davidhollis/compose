@@ -8,6 +8,7 @@ lazy val root = (project in file("."))
     name := "compose",
     libraryDependencies ++= Seq(
       "com.typesafe" % "config" % "1.4.0",
+      "com.iheart" %% "ficus" % "1.4.7",
       "org.scalatest" %% "scalatest" % "3.1.1" % Test,
     )
   )
