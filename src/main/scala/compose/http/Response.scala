@@ -9,7 +9,7 @@ case class Response(
   headers: Headers,
   body: Source,
 ) {
-  def writeTo(out: OutputStream): Unit = ()
+  def writeTo(out: OutputStream): Unit = () // TODO write out the response
 }
 
 object Response {
