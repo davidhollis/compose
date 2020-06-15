@@ -1,14 +1,18 @@
 package compose.http
 
+import scala.io.Source
+
 case class Request(
   version: Float,
   method: Request.Method,
   path: String,
   headers: Map[String, String],
-  // body: some kind of stream
+  body: Source,
 )
 
 object Request {
+  def parse(source: Source): Option[Request] = None // TODO
+
   sealed abstract class Method(override val toString: String)
   object Method {
     case object Get extends Method("GET")

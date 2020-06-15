@@ -1,11 +1,16 @@
 package compose.http
 
+import java.io.OutputStream
+import scala.io.Source
+
 case class Response(
   version: Float,
   status: Response.Status,
   headers: Map[String, String],
-  // body: some kind of stream
-)
+  body: Source,
+) {
+  def writeTo(out: OutputStream): Unit = ()
+}
 
 object Response {
   sealed abstract class Status(val code: Int, override val toString: String)
