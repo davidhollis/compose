@@ -6,7 +6,7 @@ case class Request(
   version: Float,
   method: Request.Method,
   path: String,
-  headers: Map[String, String],
+  headers: Headers,
   body: Source,
 )
 

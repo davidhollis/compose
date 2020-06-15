@@ -6,7 +6,7 @@ import scala.io.Source
 case class Response(
   version: Float,
   status: Response.Status,
-  headers: Map[String, String],
+  headers: Headers,
   body: Source,
 ) {
   def writeTo(out: OutputStream): Unit = ()
