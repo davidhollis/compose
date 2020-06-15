@@ -1,6 +1,7 @@
 package compose.http
 
 case class Response(
+  version: Float,
   status: Response.Status,
   headers: Map[String, String],
   // body: some kind of stream
