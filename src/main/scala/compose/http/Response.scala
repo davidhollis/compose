@@ -1,18 +1,35 @@
 package compose.http
 
-import java.io.OutputStream
+import java.io.{ ByteArrayInputStream, InputStream, OutputStream, OutputStreamWriter }
 import scala.io.Source
 
 case class Response(
   version: Float,
   status: Response.Status,
   headers: Headers,
-  body: Source,
+  body: InputStream,
 ) {
-  def writeTo(out: OutputStream): Unit = () // TODO write out the response
+  lazy val statusLine: String = s"HTTP/${version} ${status.code} ${status}\r\n"
+
+  def writeTo(out: OutputStream): Unit = {
+    val writer = new OutputStreamWriter(out, Request.headerEncoding)
+    writer.write(statusLine)
+    writer.write(headers.render)
+    writer.write("\r\n\r\n")
+    writer.flush()
+    body.transferTo(out)
+  }
 }
 
 object Response {
+  def withStringBody(
+    version: Float,
+    status: Response.Status,
+    headers: Headers,
+    bodyStr: String,
+    encoding: String = "UTF-8",
+  ): Response = Response(version, status, headers, new ByteArrayInputStream(bodyStr.getBytes(encoding)))
+
   sealed abstract class Status(val code: Int, override val toString: String)
   object Status {
     // 1xx: Informational statuses

@@ -1,6 +1,8 @@
 package compose.server
 
 import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.scalalogging.StrictLogging
+import java.io.InputStream
 import java.net.{InetAddress, ServerSocket}
 import java.util.concurrent.{Executors, ExecutorService}
 import net.ceedubs.ficus.Ficus._
@@ -11,7 +13,7 @@ import scala.util.{Success, Failure}
 import compose.{Application, Server}
 import compose.http.{Request, Response, Headers, Versions}
 
-case class SimpleDevelopmentServer(config: Config) extends Server {
+case class SimpleDevelopmentServer(config: Config) extends Server with StrictLogging {
   private val serverConfig: Config = config.getAs[Config]("compose.server").getOrElse(ConfigFactory.empty())
   implicit lazy val executionContext: ExecutionContext = {
     val threadPool: ExecutorService =
@@ -20,7 +22,7 @@ case class SimpleDevelopmentServer(config: Config) extends Server {
         .getOrElse(Executors.newSingleThreadExecutor())
     ExecutionContext.fromExecutorService(threadPool)
   }
-  def apply(application: Application): Unit = {
+  def apply(application: Application[InputStream]): Unit = {
     val socket = new ServerSocket(
       serverConfig.getAs[Int]("port").getOrElse(8090),
       serverConfig.getAs[Int]("backlog").getOrElse(16),
@@ -28,32 +30,38 @@ case class SimpleDevelopmentServer(config: Config) extends Server {
         serverConfig.getAs[String]("host").getOrElse("127.0.0.1")
       ),
     )
+    logger.info(s"Listening on ${socket.getInetAddress()}:${socket.getLocalPort()}")
 
     while (true) {
       val connection = socket.accept()
-      Future[Option[Request]] {
-        Request.parse(Source.fromInputStream(connection.getInputStream()))
+      Future[Option[Request[InputStream]]] {
+        logger.debug("Received request. Validating.")
+        Request.parse(connection.getInputStream())
       }.flatMap {
-        case Some(request) => application(request)
-        case None => Future.successful(Response(
-            Versions.HTTP_1_1,
-            Response.Status.BadRequest,
-            Headers(
-              "Content-Type" -> "text/plain",
-            ),
-            Source.fromString(SimpleDevelopmentServer.badRequestError),
-        ))
-      }.onComplete {
-        case Success(response) => response.writeTo(connection.getOutputStream())
-        case Failure(err) => {
-          Response(
-            Versions.HTTP_1_1,
-            Response.Status.InternalServerError,
-            Headers(
-              "Content-Type" -> "text/plain",
-            ),
-            Source.fromString(SimpleDevelopmentServer.serializeError(err)),
-          ).writeTo(connection.getOutputStream())
+        case Some(request) => {
+          logger.info(s"Received ${request.method} ${request.path}")
+          application(request)
+        }
+        case None => {
+          logger.info(s"Received bad request.")
+          SimpleDevelopmentServer.badRequestResponse
+        }
+      }.onComplete { reponseOrError =>
+        val outputStream = connection.getOutputStream()
+        try {
+          reponseOrError match {
+            case Success(response) => {
+              logger.info(s"Sending response with status ${response.status.code}")
+              response.writeTo(outputStream)
+            }
+            case Failure(err) => {
+              logger.error(s"Uncaught exception. Sending response with status ${Response.Status.InternalServerError.code}", err)
+              SimpleDevelopmentServer.internalServerErrorResponse(err).writeTo(outputStream)
+            }
+          }
+        } finally {
+          outputStream.close()
+          connection.close()
         }
       }
     }
@@ -61,6 +69,19 @@ case class SimpleDevelopmentServer(config: Config) extends Server {
 }
 
 object SimpleDevelopmentServer {
+  def internalServerErrorResponse(err: Throwable): Response = {
+    val errBody = serializeError(err)
+    Response.withStringBody(
+      Versions.HTTP_1_1,
+      Response.Status.InternalServerError,
+      Headers(
+        "Content-Type" -> "text/plain",
+        "Content-Length" -> errBody.length.toString(),
+      ),
+      errBody,
+    )
+  }
+
   def serializeError(err: Throwable): String = {
     s"""
       |An error occurred while processing this request.
@@ -83,5 +104,17 @@ object SimpleDevelopmentServer {
     base + trace + causes
   }
 
-  val badRequestError: String = "Failed to parse HTTP request."
+  val badRequestError: String = "Failed to parse HTTP request.\n"
+
+  lazy val badRequestResponse: Future[Response] = Future.successful(
+    Response.withStringBody(
+      Versions.HTTP_1_1,
+      Response.Status.BadRequest,
+      Headers(
+        "Content-Type" -> "text/plain",
+        "Content-Length" -> badRequestError.length.toString(),
+      ),
+      SimpleDevelopmentServer.badRequestError,
+    )
+  )
 }
