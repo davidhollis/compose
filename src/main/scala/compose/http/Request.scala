@@ -6,7 +6,7 @@ import scala.util.Try
 import scala.util.matching.Regex
 
 case class Request[+B](
-  version: Float,
+  version: Version,
   method: Request.Method,
   path: String,
   headers: Headers,

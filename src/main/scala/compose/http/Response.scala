@@ -4,12 +4,12 @@ import java.io.{ ByteArrayInputStream, InputStream, OutputStream, OutputStreamWr
 import scala.io.Source
 
 case class Response(
-  version: Float,
+  version: Version,
   status: Response.Status,
   headers: Headers,
   body: InputStream,
 ) {
-  lazy val statusLine: String = s"HTTP/${version} ${status.code} ${status}\r\n"
+  lazy val statusLine: String = s"${version} ${status.code} ${status}\r\n"
 
   def writeTo(out: OutputStream): Unit = {
     val writer = new OutputStreamWriter(out, Request.headerEncoding)
@@ -23,7 +23,7 @@ case class Response(
 
 object Response {
   def withStringBody(
-    version: Float,
+    version: Version,
     status: Response.Status,
     headers: Headers,
     bodyStr: String,

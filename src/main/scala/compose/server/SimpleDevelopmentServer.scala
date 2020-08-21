@@ -11,7 +11,7 @@ import scala.io.Source
 import scala.util.{Success, Failure}
 
 import compose.{Application, Server}
-import compose.http.{Request, Response, Headers, Versions}
+import compose.http.{Request, Response, Headers, Version}
 
 case class SimpleDevelopmentServer(config: Config) extends Server with StrictLogging {
   private val serverConfig: Config = config.getAs[Config]("compose.server").getOrElse(ConfigFactory.empty())
@@ -72,7 +72,7 @@ object SimpleDevelopmentServer {
   def internalServerErrorResponse(err: Throwable): Response = {
     val errBody = serializeError(err)
     Response.withStringBody(
-      Versions.HTTP_1_1,
+      Version.HTTP_1_1,
       Response.Status.InternalServerError,
       Headers(
         "Content-Type" -> "text/plain",
@@ -108,7 +108,7 @@ object SimpleDevelopmentServer {
 
   lazy val badRequestResponse: Future[Response] = Future.successful(
     Response.withStringBody(
-      Versions.HTTP_1_1,
+      Version.HTTP_1_1,
       Response.Status.BadRequest,
       Headers(
         "Content-Type" -> "text/plain",
