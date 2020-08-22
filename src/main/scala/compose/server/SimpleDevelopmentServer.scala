@@ -12,6 +12,7 @@ import scala.util.{Success, Failure}
 
 import compose.{Application, Server}
 import compose.http.{Request, Response, Headers, Status, Version}
+import compose.rendering.implicits._
 
 case class SimpleDevelopmentServer(config: Config) extends Server with StrictLogging {
   private val serverConfig: Config = config.getAs[Config]("compose.server").getOrElse(ConfigFactory.empty())
@@ -71,14 +72,9 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
 object SimpleDevelopmentServer {
   def internalServerErrorResponse(err: Throwable): Response = {
     val errBody = serializeError(err)
-    Response.withStringBody(
-      Version.HTTP_1_1,
-      Status.InternalServerError,
-      Headers(
-        "Content-Type" -> "text/plain",
-        "Content-Length" -> errBody.length.toString(),
-      ),
+    Response[String](
       errBody,
+      status = Status.InternalServerError,
     )
   }
 
@@ -107,14 +103,9 @@ object SimpleDevelopmentServer {
   val badRequestError: String = "Failed to parse HTTP request.\n"
 
   lazy val badRequestResponse: Future[Response] = Future.successful(
-    Response.withStringBody(
-      Version.HTTP_1_1,
-      Status.BadRequest,
-      Headers(
-        "Content-Type" -> "text/plain",
-        "Content-Length" -> badRequestError.length.toString(),
-      ),
+    Response[String](
       SimpleDevelopmentServer.badRequestError,
+      status = Status.BadRequest,
     )
   )
 }

@@ -1,7 +1,8 @@
 package compose.http
 
-import java.io.{ ByteArrayInputStream, InputStream, OutputStream, OutputStreamWriter }
-import scala.io.Source
+import java.io.{ InputStream, OutputStream, OutputStreamWriter }
+import scala.annotation.implicitNotFound
+import compose.http.Response.Renderer.Failure
 
 case class Response(
   version: Version,
@@ -22,11 +23,34 @@ case class Response(
 }
 
 object Response {
-  def withStringBody(
-    version: Version,
-    status: Status,
-    headers: Headers,
-    bodyStr: String,
-    encoding: String = "UTF-8",
-  ): Response = Response(version, status, headers, new ByteArrayInputStream(bodyStr.getBytes(encoding)))
+  def apply[B: Renderer](
+    rawBody: B,
+    version: Version = Version.HTTP_1_1,
+    status: Status = Status.OK,
+    headers: Headers = Headers.empty,
+  ): Response = Renderer[B].render(rawBody) match {
+    case Renderer.Success(defaultHeaders, bodyStream) => Response(version, status, defaultHeaders.replace(headers), bodyStream)
+    case Renderer.Failure(errorMessage) =>
+      Response[String](
+        errorMessage,
+        version = version,
+        status = Status.InternalServerError,
+        headers = headers
+      )(compose.rendering.implicits.stringRenderer)
+  }
+
+  @implicitNotFound("No renderer found for type ${B}")
+  trait Renderer[-B] {
+    def render(body: B): Renderer.Result
+  }
+
+  object Renderer {
+    def instance[B](rf: B => Renderer.Result): Renderer[B] = new Renderer[B] { def render(body: B): Renderer.Result = rf(body) }
+
+    def apply[B](implicit r: Renderer[B]): Renderer[B] = r
+
+    sealed trait Result
+    case class Success(defaultHeaders: Headers, bodyStream: InputStream) extends Result
+    case class Failure(errorMessage: String) extends Result
+  }
 }
