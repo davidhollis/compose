@@ -38,6 +38,8 @@ case class Headers(
 }
 
 object Headers {
+  private[http] val encoding: String = "ISO-8859-1"
+
   def apply(initial: (String, String)*): Headers = Headers(
     (for {
       (key, pairs) <- initial.groupBy(_._1.toLowerCase())

@@ -7,20 +7,13 @@ import scala.util.matching.Regex
 
 case class Request[+B](
   version: Version,
-  method: Request.Method,
+  method: Method,
   path: String,
   headers: Headers,
   body: B,
 )
 
 object Request {
-  private lazy val startLine: Regex = {
-    val allMethodsAlternation = Method.all.map(_.toString).mkString("|")
-    s"""^(${allMethodsAlternation}) (.*) (HTTP/[0-9.]+)$$""".r
-  }
-
-  private[http] val headerEncoding: String = "ISO-8859-1"
-
   def parse(inputStream: InputStream): Option[Request[InputStream]] = {
     val headSection = RequestHeadReader.readHeading(inputStream)
     val headerSource = Source.fromString(headSection)
@@ -39,27 +32,9 @@ object Request {
     }
   }
 
-  sealed abstract class Method(override val toString: String)
-  object Method {
-    case object Get extends Method("GET")
-    case object Head extends Method("HEAD")
-    case object Post extends Method("POST")
-    case object Put extends Method("PUT")
-    case object Delete extends Method("DELETE")
-    case object Connect extends Method("CONNECT")
-    case object Options extends Method("OPTIONS")
-    case object Trace extends Method("TRACE")
-    case object Patch extends Method("PATCH")
-
-    lazy val all: Set[Method] = Set(
-      Get, Head, Post, Put, Delete, Connect, Options, Trace, Patch,
-    )
-
-    lazy val byName: Map[String, Method] =
-      all.map { method => (method.toString -> method) }.toMap
-
-    def unapply(methodStr: String): Option[Method] =
-      byName.get(methodStr.toUpperCase)
+  private lazy val startLine: Regex = {
+    val allMethodsAlternation = Method.all.map(_.toString).mkString("|")
+    s"""^(${allMethodsAlternation}) (.*) (HTTP/[0-9.]+)$$""".r
   }
 
   private object RequestHeadReader {

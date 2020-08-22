@@ -11,7 +11,7 @@ import scala.io.Source
 import scala.util.{Success, Failure}
 
 import compose.{Application, Server}
-import compose.http.{Request, Response, Headers, Version}
+import compose.http.{Request, Response, Headers, Status, Version}
 
 case class SimpleDevelopmentServer(config: Config) extends Server with StrictLogging {
   private val serverConfig: Config = config.getAs[Config]("compose.server").getOrElse(ConfigFactory.empty())
@@ -55,7 +55,7 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
               response.writeTo(outputStream)
             }
             case Failure(err) => {
-              logger.error(s"Uncaught exception. Sending response with status ${Response.Status.InternalServerError.code}", err)
+              logger.error(s"Uncaught exception. Sending response with status ${Status.InternalServerError.code}", err)
               SimpleDevelopmentServer.internalServerErrorResponse(err).writeTo(outputStream)
             }
           }
@@ -73,7 +73,7 @@ object SimpleDevelopmentServer {
     val errBody = serializeError(err)
     Response.withStringBody(
       Version.HTTP_1_1,
-      Response.Status.InternalServerError,
+      Status.InternalServerError,
       Headers(
         "Content-Type" -> "text/plain",
         "Content-Length" -> errBody.length.toString(),
@@ -109,7 +109,7 @@ object SimpleDevelopmentServer {
   lazy val badRequestResponse: Future[Response] = Future.successful(
     Response.withStringBody(
       Version.HTTP_1_1,
-      Response.Status.BadRequest,
+      Status.BadRequest,
       Headers(
         "Content-Type" -> "text/plain",
         "Content-Length" -> badRequestError.length.toString(),
