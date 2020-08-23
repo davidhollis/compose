@@ -3,7 +3,7 @@ ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "computer.hollis"
 ThisBuild / organizationName := "hollis"
 
-lazy val root = (project in file("."))
+lazy val core = (project in file("core"))
   .settings(
     name := "compose",
     libraryDependencies ++= Seq(
@@ -16,4 +16,13 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq(
       "-deprecation",
     ),
+  )
+
+lazy val demos = (project in file("demos"))
+  .dependsOn(core)
+  .settings(
+    name := "compose-demos",
+    scalacOptions ++= Seq(
+      "-deprecation",
+    )
   )
