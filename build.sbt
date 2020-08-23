@@ -15,6 +15,7 @@ lazy val core = (project in file("core"))
       "com.iheart" %% "ficus" % "1.4.7",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
+      "io.lemonlabs" %% "scala-uri" % "2.3.0",
       "org.scalatest" %% "scalatest" % "3.1.1" % Test,
     ),
     scalacOptions ++= Seq(

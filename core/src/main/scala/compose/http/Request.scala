@@ -8,7 +8,7 @@ import scala.util.matching.Regex
 case class Request[+B](
   version: Version,
   method: Method,
-  path: String,
+  target: RequestTarget,
   headers: Headers,
   body: B,
 )
@@ -18,12 +18,12 @@ object Request {
     val headSection = RequestHeadReader.readHeading(inputStream)
     val headerSource = Source.fromString(headSection)
     headerSource.getLines().next match {
-      case startLine(Method(method), path, Version(version)) => {
+      case startLine(Method(method), targetString, Version(version)) => {
         val headers = Headers.parse(headerSource)
         Some(Request(
           version,
           method,
-          path,
+          RequestTarget.parse(targetString),
           headers,
           body=inputStream,
         ))

@@ -40,7 +40,7 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
         Request.parse(connection.getInputStream())
       }.flatMap {
         case Some(request) => {
-          logger.info(s"Received ${request.method} ${request.path}")
+          logger.info(s"Received ${request.method} ${request.target.toString}")
           application(request)
         }
         case None => {

@@ -19,7 +19,7 @@ class RequestSpec extends compose.Spec {
 
       parsedRequest.value.version should equal (Version.HTTP_1_1)
       parsedRequest.value.method should equal (Method.Post)
-      parsedRequest.value.path should equal ("/test/path?with=params")
+      parsedRequest.value.target shouldBe a[RequestTarget]
 
       parsedRequest.value.headers.iterator.length should equal (3)
       parsedRequest.value.headers.getAll("User-Agent") should contain theSameElementsAs Seq("scalatest")

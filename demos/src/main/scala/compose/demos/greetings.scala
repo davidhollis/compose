@@ -7,7 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
 
 import compose.Application
-import compose.http.{Request, Response, Method, Status, Headers, Version}
+import compose.http.{Request, Response, Method, Status, Headers, Version, RequestTarget}
 import compose.rendering.implicits._
 import compose.server.SimpleDevelopmentServer
 
@@ -17,7 +17,7 @@ class GreetingsApplication(greeting: String) extends Application[AnyRef] {
   private val greetingPath = """^/greet/(.*)$""".r
 
   def apply(request: Request[AnyRef]): Future[Response] = request match {
-    case Request(_, Method.Get, greetingPath(name), _, _) => {
+    case Request(_, Method.Get, RequestTarget.Path(greetingPath(name), _), _, _) => {
       val greetingBody = s"${greeting}, ${name}!\n"
       Future.successful(Response[String](greetingBody))
     }
