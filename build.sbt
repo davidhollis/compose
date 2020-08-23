@@ -3,6 +3,10 @@ ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "computer.hollis"
 ThisBuild / organizationName := "hollis"
 
+lazy val root = (project in file("."))
+  .aggregate(core, demos)
+  .dependsOn(core, demos)
+
 lazy val core = (project in file("core"))
   .settings(
     name := "compose",
