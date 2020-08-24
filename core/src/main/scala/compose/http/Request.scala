@@ -13,19 +13,22 @@ case class Request[+B](
 )
 
 object Request {
+
   def parse(inputStream: InputStream): Option[Request[InputStream]] = {
     val headSection = RequestHeadReader.readHeading(inputStream)
     val headerSource = Source.fromString(headSection)
     headerSource.getLines().next match {
       case startLine(Method(method), targetString, Version(version)) => {
         val headers = Headers.parse(headerSource)
-        Some(Request(
-          version,
-          method,
-          RequestTarget.parse(targetString),
-          headers,
-          body=inputStream,
-        ))
+        Some(
+          Request(
+            version,
+            method,
+            RequestTarget.parse(targetString),
+            headers,
+            body = inputStream,
+          )
+        )
       }
       case _ => None // Invalid start line
     }
@@ -46,20 +49,24 @@ object Request {
       if (b == cr) CrState
       else StartState
     )
+
     private val CrState: ReaderState = new ReaderState(false)(b =>
       if (b == cr) CrState
       else if (b == lf) CrLfState
       else StartState
     )
+
     private val CrLfState: ReaderState = new ReaderState(false)(b =>
       if (b == cr) CrLfCrState
       else StartState
     )
+
     private val CrLfCrState: ReaderState = new ReaderState(false)(b =>
       if (b == cr) CrState
       else if (b == lf) CrLfCrLfState
       else StartState
     )
+
     private val CrLfCrLfState: ReaderState = new ReaderState(true)(_ => CrLfCrLfState)
 
     def readHeading(inputStream: InputStream): String = {
@@ -74,5 +81,7 @@ object Request {
 
       heading.toString()
     }
+
   }
+
 }

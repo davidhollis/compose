@@ -4,6 +4,7 @@ sealed abstract class Status(val code: Int, val reasonPhrase: String) {
   override lazy val toString: String = s"$code $reasonPhrase"
 }
 
+// format: off
 object Status {
   // 1xx: Informational statuses
   case object Continue extends Status(100, "Continue")
@@ -78,3 +79,4 @@ object Status {
   case object NetworkAuthenticationRequired extends Status(511, "Network Authentication Required")
   case object NetworkConnectTimeoutError extends Status(599, "Network Connect Timeout Error")
 }
+// format: on

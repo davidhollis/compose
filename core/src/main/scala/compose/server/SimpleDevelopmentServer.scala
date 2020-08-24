@@ -1,27 +1,32 @@
 package compose.server
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory }
 import com.typesafe.scalalogging.StrictLogging
 import java.io.InputStream
-import java.net.{InetAddress, ServerSocket}
-import java.util.concurrent.{Executors, ExecutorService}
+import java.net.{ InetAddress, ServerSocket }
+import java.util.concurrent.{ ExecutorService, Executors }
 import net.ceedubs.ficus.Ficus._
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Failure}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
-import compose.{Application, Server}
-import compose.http.{Request, Response, Status}
+import compose.{ Application, Server }
+import compose.http.{ Request, Response, Status }
 import compose.rendering.implicits._
 
 case class SimpleDevelopmentServer(config: Config) extends Server with StrictLogging {
-  private val serverConfig: Config = config.getAs[Config]("compose.server").getOrElse(ConfigFactory.empty())
+
+  private val serverConfig: Config =
+    config.getAs[Config]("compose.server").getOrElse(ConfigFactory.empty())
+
   implicit lazy val executionContext: ExecutionContext = {
     val threadPool: ExecutorService =
-      serverConfig.getAs[Int]("numThreads")
+      serverConfig
+        .getAs[Int]("numThreads")
         .map(Executors.newFixedThreadPool(_))
         .getOrElse(Executors.newSingleThreadExecutor())
     ExecutionContext.fromExecutorService(threadPool)
   }
+
   def apply(application: Application[InputStream]): Unit = {
     val socket = new ServerSocket(
       serverConfig.getAs[Int]("port").getOrElse(8090),
@@ -55,7 +60,10 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
               response.writeTo(outputStream)
             }
             case Failure(err) => {
-              logger.error(s"Uncaught exception. Sending response with status ${Status.InternalServerError.code}", err)
+              logger.error(
+                s"Uncaught exception. Sending response with status ${Status.InternalServerError.code}",
+                err,
+              )
               SimpleDevelopmentServer.internalServerErrorResponse(err).writeTo(outputStream)
             }
           }
@@ -66,9 +74,11 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
       }
     }
   }
+
 }
 
 object SimpleDevelopmentServer {
+
   def internalServerErrorResponse(err: Throwable): Response = {
     val errBody = serializeError(err)
     Response[String](
@@ -79,10 +89,10 @@ object SimpleDevelopmentServer {
 
   def serializeError(err: Throwable): String = {
     s"""
-      |An error occurred while processing this request.
-      |(If you're seeing this error in a production environment, please switch to the production server.)
-      |
-      |${renderThrowable(err)}
+       |An error occurred while processing this request.
+       |(If you're seeing this error in a production environment, please switch to the production server.)
+       |
+       |${renderThrowable(err)}
     """.stripMargin
   }
 
@@ -107,4 +117,5 @@ object SimpleDevelopmentServer {
       status = Status.BadRequest,
     )
   )
+
 }

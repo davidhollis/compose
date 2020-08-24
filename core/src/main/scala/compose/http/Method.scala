@@ -14,7 +14,15 @@ object Method {
   case object Patch extends Method("PATCH")
 
   lazy val all: Set[Method] = Set(
-    Get, Head, Post, Put, Delete, Connect, Options, Trace, Patch,
+    Get,
+    Head,
+    Post,
+    Put,
+    Delete,
+    Connect,
+    Options,
+    Trace,
+    Patch,
   )
 
   lazy val byName: Map[String, Method] =
@@ -22,4 +30,5 @@ object Method {
 
   def unapply(methodStr: String): Option[Method] =
     byName.get(methodStr.toUpperCase)
+
 }

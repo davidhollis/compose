@@ -19,24 +19,28 @@ case class Response(
     writer.flush()
     body.transferTo(out)
   }
+
 }
 
 object Response {
+
   def apply[B: Renderer](
     rawBody: B,
     version: Version = Version.HTTP_1_1,
     status: Status = Status.OK,
     headers: Headers = Headers.empty,
-  ): Response = Renderer[B].render(rawBody) match {
-    case Renderer.Success(defaultHeaders, bodyStream) => Response(version, status, defaultHeaders.replace(headers), bodyStream)
-    case Renderer.Failure(errorMessage) =>
-      Response[String](
-        errorMessage,
-        version = version,
-        status = Status.InternalServerError,
-        headers = headers
-      )(compose.rendering.implicits.stringRenderer)
-  }
+  ): Response =
+    Renderer[B].render(rawBody) match {
+      case Renderer.Success(defaultHeaders, bodyStream) =>
+        Response(version, status, defaultHeaders.replace(headers), bodyStream)
+      case Renderer.Failure(errorMessage) =>
+        Response[String](
+          errorMessage,
+          version = version,
+          status = Status.InternalServerError,
+          headers = headers,
+        )(compose.rendering.implicits.stringRenderer)
+    }
 
   @implicitNotFound("No renderer found for type ${B}")
   trait Renderer[-B] {
@@ -44,7 +48,9 @@ object Response {
   }
 
   object Renderer {
-    def instance[B](rf: B => Renderer.Result): Renderer[B] = new Renderer[B] { def render(body: B): Renderer.Result = rf(body) }
+
+    def instance[B](rf: B => Renderer.Result): Renderer[B] =
+      new Renderer[B] { def render(body: B): Renderer.Result = rf(body) }
 
     def apply[B](implicit r: Renderer[B]): Renderer[B] = r
 
@@ -52,4 +58,5 @@ object Response {
     case class Success(defaultHeaders: Headers, bodyStream: InputStream) extends Result
     case class Failure(errorMessage: String) extends Result
   }
+
 }

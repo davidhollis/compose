@@ -18,10 +18,12 @@ object Version {
 
   private val versionRegex = """HTTP/([0-9.]+)""".r
 
-  def unapply(versionStr: String): Option[Version] = versionStr match {
-    case versionRegex(versionNumber) => {
-      Try[Float](versionNumber.toFloat).toOption.flatMap(byNumber.get)
+  def unapply(versionStr: String): Option[Version] =
+    versionStr match {
+      case versionRegex(versionNumber) => {
+        Try[Float](versionNumber.toFloat).toOption.flatMap(byNumber.get)
+      }
+      case _ => None
     }
-    case _ => None
-  }
+
 }

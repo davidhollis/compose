@@ -16,29 +16,41 @@ import io.lemonlabs.uri.encoding.percentEncode
 sealed trait RequestTarget
 
 object RequestTarget {
+
   final case class Path(path: String, queryParams: Map[String, Seq[String]]) extends RequestTarget {
+
     override lazy val toString: String = UrlPath.parseOption(path) match {
       case Some(urlPath) =>
         RelativeUrl(
           urlPath,
           QueryString(
-            queryParams.iterator.flatMap { case (key, valueSeq) =>
-              if (valueSeq.isEmpty) Seq(key -> None)
-              else valueSeq.map(value => (key -> Some(value)))
+            queryParams.iterator.flatMap {
+              case (key, valueSeq) =>
+                if (valueSeq.isEmpty) Seq(key -> None)
+                else valueSeq.map(value => (key -> Some(value)))
             }.toVector
           ),
           None,
         ).toString()
       case None => (percentEncode -- '/').encode(path, "UTF-8")
     }
+
   }
 
   final case class Absolute(uri: URI) extends RequestTarget {
     override lazy val toString: String = uri.toString()
   }
 
-  final case class Authority(host: String, user: Option[String], password: Option[String], port: Option[Int]) extends RequestTarget {
-    override lazy val toString: String = LLAuthority(user.map(u => UserInfo(u, password)), Host.parse(host), port).toString()
+  final case class Authority(
+    host: String,
+    user: Option[String],
+    password: Option[String],
+    port: Option[Int],
+  ) extends RequestTarget {
+
+    override lazy val toString: String =
+      LLAuthority(user.map(u => UserInfo(u, password)), Host.parse(host), port).toString()
+
   }
 
   case object Asterisk extends RequestTarget {
@@ -63,7 +75,8 @@ object RequestTarget {
               // If none of the above apply, it's a Path.
               // If we can extract an absolute path and a query string, do that; if not, just assume the whole thing is a path
               RelativeUrl.parseOption(trimmed) match {
-                case Some(RelativeUrl(path: AbsoluteOrEmptyPath, query, _)) => Path(path.toString(), query.paramMap)
+                case Some(RelativeUrl(path: AbsoluteOrEmptyPath, query, _)) =>
+                  Path(path.toString(), query.paramMap)
                 case _ => Path(trimmed, Map.empty[String, Seq[String]])
               }
             }
@@ -72,4 +85,5 @@ object RequestTarget {
       }
     }
   }
+
 }

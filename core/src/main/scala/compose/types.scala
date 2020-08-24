@@ -2,9 +2,9 @@ package compose
 
 import com.typesafe.config.Config
 import java.io.InputStream
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-import compose.http.{Request, Response}
+import compose.http.{ Request, Response }
 
 // Principle: A web application is a function Request => Future[Response].
 trait Application[-B] extends (Request[B] => Future[Response])
@@ -25,4 +25,5 @@ trait Server extends (Application[InputStream] => Unit) {
     val application = setupApplication(config)(executionContext)
     this(application)
   }
+
 }
