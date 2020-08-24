@@ -1,8 +1,7 @@
 package compose.http
 
-import java.io.{ InputStream, InputStreamReader, BufferedReader }
+import java.io.InputStream
 import scala.io.Source
-import scala.util.Try
 import scala.util.matching.Regex
 
 case class Request[+B](

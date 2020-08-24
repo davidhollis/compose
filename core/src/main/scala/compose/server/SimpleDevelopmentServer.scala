@@ -7,11 +7,10 @@ import java.net.{InetAddress, ServerSocket}
 import java.util.concurrent.{Executors, ExecutorService}
 import net.ceedubs.ficus.Ficus._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.io.Source
 import scala.util.{Success, Failure}
 
 import compose.{Application, Server}
-import compose.http.{Request, Response, Headers, Status, Version}
+import compose.http.{Request, Response, Status}
 import compose.rendering.implicits._
 
 case class SimpleDevelopmentServer(config: Config) extends Server with StrictLogging {

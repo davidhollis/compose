@@ -2,7 +2,6 @@ package compose.http
 
 import java.io.{ InputStream, OutputStream, OutputStreamWriter }
 import scala.annotation.implicitNotFound
-import compose.http.Response.Renderer.Failure
 
 case class Response(
   version: Version,

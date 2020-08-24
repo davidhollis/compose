@@ -20,6 +20,8 @@ lazy val core = (project in file("core"))
     ),
     scalacOptions ++= Seq(
       "-deprecation",
+      "-Xlint:unused",
+      "-Wdead-code",
     ),
   )
 

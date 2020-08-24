@@ -1,7 +1,6 @@
 package compose.http
 
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
-import compose.http.Response.Renderer
 
 class ResponseSpec extends compose.Spec {
   "The response writer" should {

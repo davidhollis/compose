@@ -1,6 +1,6 @@
 package compose
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
 import java.io.InputStream
 import scala.concurrent.{ExecutionContext, Future}
 
