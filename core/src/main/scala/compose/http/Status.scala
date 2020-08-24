@@ -4,10 +4,6 @@ sealed abstract class Status(val code: Int, val reasonPhrase: String) {
   override lazy val toString: String = s"$code $reasonPhrase"
 }
 
-// scalastyle:off magic.number number.of.methods number.of.types
-// magic.number      : All these numbers are HTTP status codes. They don't need dedicated constants.
-// number.of.methods : No sense in breaking this up into multiple files. It's just a big long list of statuses.
-// number.of.types   : This is triggered by the same pattern that hit number.of.methods and is ignored for the same reason.
 object Status {
   // 1xx: Informational statuses
   case object Continue extends Status(100, "Continue")
@@ -82,4 +78,3 @@ object Status {
   case object NetworkAuthenticationRequired extends Status(511, "Network Authentication Required")
   case object NetworkConnectTimeoutError extends Status(599, "Network Connect Timeout Error")
 }
-// scalastyle:on magic.number number.of.methods number.of.types

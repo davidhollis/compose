@@ -9,7 +9,7 @@ import io.lemonlabs.uri.{
   UserInfo,
   Host,
   UrlPath,
-  QueryString
+  QueryString,
 }
 import io.lemonlabs.uri.encoding.percentEncode
 
@@ -23,11 +23,8 @@ object RequestTarget {
           urlPath,
           QueryString(
             queryParams.iterator.flatMap { case (key, valueSeq) =>
-              if (valueSeq.isEmpty) {
-                Seq(key -> None)
-              } else {
-                valueSeq.map(value => (key -> Some(value)))
-              }
+              if (valueSeq.isEmpty) Seq(key -> None)
+              else valueSeq.map(value => (key -> Some(value)))
             }.toVector
           ),
           None,
