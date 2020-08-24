@@ -25,10 +25,10 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
   }
   def apply(application: Application[InputStream]): Unit = {
     val socket = new ServerSocket(
-      serverConfig.getAs[Int]("port").getOrElse(8090),
-      serverConfig.getAs[Int]("backlog").getOrElse(16),
+      serverConfig.getAs[Int]("port").getOrElse(SimpleDevelopmentServer.Defaults.portNumber),
+      serverConfig.getAs[Int]("backlog").getOrElse(SimpleDevelopmentServer.Defaults.backlog),
       InetAddress.getByName(
-        serverConfig.getAs[String]("host").getOrElse("127.0.0.1")
+        serverConfig.getAs[String]("host").getOrElse(SimpleDevelopmentServer.Defaults.host)
       ),
     )
     logger.info(s"Listening on ${socket.getInetAddress()}:${socket.getLocalPort()}")
@@ -44,7 +44,7 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
           application(request)
         }
         case None => {
-          logger.info(s"Received bad request.")
+          logger.info("Received bad request.")
           SimpleDevelopmentServer.badRequestResponse
         }
       }.onComplete { reponseOrError =>
@@ -70,6 +70,12 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
 }
 
 object SimpleDevelopmentServer {
+  object Defaults {
+    val portNumber: Int = 8090
+    val backlog: Int = 16
+    val host: String = "127.0.0.1"
+  }
+
   def internalServerErrorResponse(err: Throwable): Response = {
     val errBody = serializeError(err)
     Response[String](
@@ -95,7 +101,7 @@ object SimpleDevelopmentServer {
     } yield s"    at ${line.toString()}\n").mkString
     val causes =
       Option[Throwable](err.getCause())
-        .map(renderThrowable(_, false))
+        .map(renderThrowable(_, root=false))
         .getOrElse("")
     base + trace + causes
   }

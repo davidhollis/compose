@@ -10,10 +10,9 @@ import compose.Application
 import compose.http.{Request, Response, Method, Status, Headers, Version, RequestTarget}
 import compose.rendering.implicits._
 import compose.server.SimpleDevelopmentServer
+import compose.Server
 
 class GreetingsApplication(greeting: String) extends Application[AnyRef] {
-  import Version.HTTP_1_1
-
   private val greetingPath = """^/greet/(.*)$""".r
 
   def apply(request: Request[AnyRef]): Future[Response] = request match {
@@ -32,7 +31,7 @@ class GreetingsApplication(greeting: String) extends Application[AnyRef] {
 }
 
 object GreetingsDemo extends scala.App with StrictLogging {
-  val server = SimpleDevelopmentServer(
+  def server: Server = SimpleDevelopmentServer(
     ConfigFactory.parseString("""
       compose.server {
         host = "127.0.0.1"

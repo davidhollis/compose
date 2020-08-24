@@ -34,7 +34,7 @@ case class Headers(
 
   def add(pairs: (String, String)*): Headers =
     Headers((this.iterator ++ pairs).toSeq: _*)
-  
+
   def add(other: Headers): Headers =
     Headers((this.iterator ++ other.iterator).toSeq: _*)
 
