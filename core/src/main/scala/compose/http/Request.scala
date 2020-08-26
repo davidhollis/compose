@@ -69,6 +69,14 @@ object Request {
 
     private val CrLfCrLfState: ReaderState = new ReaderState(true)(_ => CrLfCrLfState)
 
+    @SuppressWarnings(
+      Array(
+        // We're iterating over an unbuffered input stream of unknown size until a specific state is achieved.
+        // We need a while loop to read from the input stream and check the condition and a var to hold the current state.
+        "scalafix:DisableSyntax.var",
+        "scalafix:DisableSyntax.while",
+      )
+    )
     def readHeading(inputStream: InputStream): String = {
       val heading = new StringBuilder()
       var currentState: ReaderState = StartState

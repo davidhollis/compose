@@ -27,6 +27,12 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
     ExecutionContext.fromExecutorService(threadPool)
   }
 
+  @SuppressWarnings(
+    Array(
+      // We're intentionally looping forver, not iterating over a collection, so while is actually appropriate here
+      "scalafix:DisableSyntax.while"
+    )
+  )
   def apply(application: Application[InputStream]): Unit = {
     val socket = new ServerSocket(
       serverConfig.getAs[Int]("port").getOrElse(8090),
