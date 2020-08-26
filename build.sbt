@@ -1,7 +1,19 @@
-ThisBuild / scalaVersion     := "2.13.2"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
-ThisBuild / organization     := "computer.hollis"
-ThisBuild / organizationName := "hollis"
+inThisBuild(
+  Seq(
+    scalaVersion := "2.13.2",
+    version := "0.1.0-SNAPSHOT",
+    organization := "computer.hollis",
+    organizationName := "hollis",
+    scalacOptions ++= Seq(
+      "-deprecation",
+      "-Xlint:unused",
+      "-Wdead-code",
+    ),
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision,
+    scalafixScalaBinaryVersion := "2.13",
+  )
+)
 
 lazy val root = (project in file("."))
   .aggregate(core, demos)
@@ -18,18 +30,10 @@ lazy val core = (project in file("core"))
       "io.lemonlabs" %% "scala-uri" % "2.3.0",
       "org.scalatest" %% "scalatest" % "3.1.1" % Test,
     ),
-    scalacOptions ++= Seq(
-      "-deprecation",
-      "-Xlint:unused",
-      "-Wdead-code",
-    ),
   )
 
 lazy val demos = (project in file("demos"))
   .dependsOn(core)
   .settings(
-    name := "compose-demos",
-    scalacOptions ++= Seq(
-      "-deprecation",
-    )
+    name := "compose-demos"
   )
