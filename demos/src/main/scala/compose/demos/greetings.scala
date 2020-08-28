@@ -7,19 +7,20 @@ import scala.concurrent.Future
 
 import compose.Application
 import compose.http.{ Method, Request, RequestTarget, Response, Status }
+import compose.http.attributes.AttrList
 import compose.rendering.implicits._
 import compose.server.SimpleDevelopmentServer
 
-class GreetingsApplication(greeting: String) extends Application[AnyRef] {
+class GreetingsApplication(greeting: String) extends Application[AnyRef, AttrList] {
   private val greetingPath = """^/greet/(.*)$""".r
 
-  def apply(request: Request[AnyRef]): Future[Response] =
+  def apply(request: Request[AnyRef, AttrList]): Future[Response] =
     request match {
-      case Request(_, Method.Get, RequestTarget.Path(greetingPath(name), _), _, _) => {
+      case Request(_, Method.Get, RequestTarget.Path(greetingPath(name), _), _, _, _) => {
         val greetingBody = s"${greeting}, ${name}!\n"
         Future.successful(Response[String](greetingBody))
       }
-      case Request(_, _, path, _, _) => {
+      case Request(_, _, path, _, _, _) => {
         val errorBody = s"No document found at $path\n"
         Future.successful(
           Response[String](

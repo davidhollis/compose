@@ -4,17 +4,27 @@ import java.io.InputStream
 import scala.io.Source
 import scala.util.matching.Regex
 
-case class Request[+B](
+import compose.http.attributes.{ Attr, AttrList, NoAttrs }
+
+case class Request[+Body, +Attrs <: AttrList](
   version: Version,
   method: Method,
   target: RequestTarget,
   headers: Headers,
-  body: B,
-)
+  body: Body,
+  extendedAttributes: Attrs,
+) {
+
+  def withAttr[A](newAttr: Attr[A, NoAttrs.type]): Request[Body, Attr[A, Attrs]] =
+    this.copy[Body, Attr[A, Attrs]](
+      extendedAttributes = newAttr.copy[A, Attrs](rest = extendedAttributes)
+    )
+
+}
 
 object Request {
 
-  def parse(inputStream: InputStream): Option[Request[InputStream]] = {
+  def parse(inputStream: InputStream): Option[Request[InputStream, NoAttrs]] = {
     val headSection = RequestHeadReader.readHeading(inputStream)
     val headerSource = Source.fromString(headSection)
     headerSource.getLines().next match {
@@ -27,6 +37,7 @@ object Request {
             RequestTarget.parse(targetString),
             headers,
             body = inputStream,
+            extendedAttributes = NoAttrs,
           )
         )
       }
