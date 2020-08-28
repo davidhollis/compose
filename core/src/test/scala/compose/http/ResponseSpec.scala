@@ -14,7 +14,9 @@ class ResponseSpec extends compose.Spec {
       val output = new ByteArrayOutputStream()
 
       resp.writeTo(output)
-      output.toString(Headers.encoding) should equal ("HTTP/0.9 200 OK\r\nHeader-One: value-one\r\n\r\nbody body")
+      output.toString(Headers.encoding) should equal(
+        "HTTP/0.9 200 OK\r\nHeader-One: value-one\r\n\r\nbody body"
+      )
     }
 
     "encode the header section correctly" in {
@@ -28,7 +30,9 @@ class ResponseSpec extends compose.Spec {
       val output = new ByteArrayOutputStream()
 
       resp.writeTo(output)
-      output.toString(Headers.encoding) should equal (s"HTTP/0.9 200 OK\r\nTest-String: $testString\r\n\r\n")
+      output.toString(Headers.encoding) should equal(
+        s"HTTP/0.9 200 OK\r\nTest-String: $testString\r\n\r\n"
+      )
     }
   }
 
@@ -50,26 +54,27 @@ class ResponseSpec extends compose.Spec {
           BuilderTestCase(good = true),
           status = Status.ImATeapot,
         )(testCaseRenderer)
-  
-        resp.status should equal (Status.ImATeapot)
+
+        resp.status should equal(Status.ImATeapot)
       }
 
       "pass on the default headers" in {
         val resp = Response[BuilderTestCase](BuilderTestCase(good = true))(testCaseRenderer)
-  
-        resp.headers.get("test-header-1") should equal (Some("default value 1"))
-        resp.headers.get("test-header-2") should equal (Some("default value 2"))
+
+        resp.headers.get("test-header-1") should equal(Some("default value 1"))
+        resp.headers.get("test-header-2") should equal(Some("default value 2"))
       }
 
       "allow the caller to override default headers" in {
         val resp = Response[BuilderTestCase](
           BuilderTestCase(good = true),
-          headers = Headers("test-header-1" -> "overridden value 1", "test-header-3" -> "overridden value 3"),
+          headers =
+            Headers("test-header-1" -> "overridden value 1", "test-header-3" -> "overridden value 3"),
         )(testCaseRenderer)
-  
-        resp.headers.get("test-header-1") should equal (Some("overridden value 1"))
-        resp.headers.get("test-header-2") should equal (Some("default value 2"))
-        resp.headers.get("test-header-3") should equal (Some("overridden value 3"))
+
+        resp.headers.get("test-header-1") should equal(Some("overridden value 1"))
+        resp.headers.get("test-header-2") should equal(Some("default value 2"))
+        resp.headers.get("test-header-3") should equal(Some("overridden value 3"))
       }
     }
 
@@ -79,8 +84,8 @@ class ResponseSpec extends compose.Spec {
           BuilderTestCase(good = false),
           status = Status.ImATeapot,
         )(testCaseRenderer)
-  
-        resp.status should equal (Status.InternalServerError)
+
+        resp.status should equal(Status.InternalServerError)
       }
     }
   }

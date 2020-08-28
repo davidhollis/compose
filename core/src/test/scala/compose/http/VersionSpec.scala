@@ -11,12 +11,12 @@ class VersionSpec extends compose.Spec {
       )
 
       for ((versionString, expectedVersion) <- cases) {
-        Version.unapply(versionString) should equal (Some(expectedVersion))
+        Version.unapply(versionString) should equal(Some(expectedVersion))
       }
     }
 
     "produce nothing from invalid version strings" in {
-      Version.unapply("HTTP/0.1") should equal (None)
+      Version.unapply("HTTP/0.1") should equal(None)
     }
   }
 }

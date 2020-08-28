@@ -6,7 +6,7 @@ class HeadersSpec extends compose.Spec {
   "A Headers instance" should {
     "ignore case of header names" in {
       val headers = Headers("TEST-HEADER" -> "TEST VALUE")
-      headers.get("test-header") should equal (Some("TEST VALUE"))
+      headers.get("test-header") should equal(Some("TEST VALUE"))
     }
 
     "get all values for a header" in {
@@ -16,7 +16,11 @@ class HeadersSpec extends compose.Spec {
         "test-header" -> "value 3",
       )
 
-      headers.getAll("test-header") should contain theSameElementsAs Seq("value 1", "value 2", "value 3")
+      headers.getAll("test-header") should contain theSameElementsAs Seq(
+        "value 1",
+        "value 2",
+        "value 3",
+      )
     }
 
     "remove all values for a header" in {
@@ -27,7 +31,7 @@ class HeadersSpec extends compose.Spec {
         "test-remains" -> "value 4",
       ).remove("test-removed")
 
-      headers.getAll("test-removed") should equal (Seq.empty[String])
+      headers.getAll("test-removed") should equal(Seq.empty[String])
       headers.getAll("test-remains") should contain theSameElementsAs Seq("value 3", "value 4")
     }
 
@@ -54,13 +58,18 @@ class HeadersSpec extends compose.Spec {
       replaced2.getAll("test-replaced-2") should contain theSameElementsAs Seq("value 8", "value 9")
       replaced2.getAll("test-remains") should contain theSameElementsAs Seq("value 5")
 
-      val replaced3 = headers.replace(Headers(
-        "test-replaced-1" -> "value 10",
-        "test-replaced-2" -> "value 11",
-        "test-replaced-2" -> "value 12",
-      ))
+      val replaced3 = headers.replace(
+        Headers(
+          "test-replaced-1" -> "value 10",
+          "test-replaced-2" -> "value 11",
+          "test-replaced-2" -> "value 12",
+        )
+      )
       replaced3.getAll("test-replaced-1") should contain theSameElementsAs Seq("value 10")
-      replaced3.getAll("test-replaced-2") should contain theSameElementsAs Seq("value 11", "value 12")
+      replaced3.getAll("test-replaced-2") should contain theSameElementsAs Seq(
+        "value 11",
+        "value 12",
+      )
       replaced3.getAll("test-remains") should contain theSameElementsAs Seq("value 5")
     }
 
@@ -88,11 +97,13 @@ class HeadersSpec extends compose.Spec {
       added3.getAll("test-existing-2") should contain theSameElementsAs Seq("value 2")
       added3.getAll("test-new-1") should contain theSameElementsAs Seq("value 6", "value 7")
 
-      val added4 = headers.add(Headers(
-        "test-existing-1" -> "value 8",
-        "test-new-1" -> "value 9",
-        "test-new-1" -> "value 10",
-      ))
+      val added4 = headers.add(
+        Headers(
+          "test-existing-1" -> "value 8",
+          "test-new-1" -> "value 9",
+          "test-new-1" -> "value 10",
+        )
+      )
       added4.getAll("test-existing-1") should contain theSameElementsAs Seq("value 1", "value 8")
       added4.getAll("test-existing-2") should contain theSameElementsAs Seq("value 2")
       added4.getAll("test-new-1") should contain theSameElementsAs Seq("value 9", "value 10")
@@ -101,38 +112,44 @@ class HeadersSpec extends compose.Spec {
 
   "The header parser" should {
     "pick up multiple instances of a header" in {
-      val parsed = Headers.parse(Source.fromString(
-        """test-parsed-1: value 1
-          |test-parsed-1: value 2
-        """.stripMargin
-      ))
+      val parsed = Headers.parse(
+        Source.fromString(
+          """test-parsed-1: value 1
+            |test-parsed-1: value 2
+          """.stripMargin
+        )
+      )
 
       parsed.getAll("test-parsed-1") should contain theSameElementsAs Seq("value 1", "value 2")
     }
 
     "skip non-header lines" in {
-      val parsed = Headers.parse(Source.fromString(
-        """test-parsed-2: value 1
-          | !!! not a header line !!!
-          |test-parsed-3: value 2
-        """.stripMargin
-      ))
+      val parsed = Headers.parse(
+        Source.fromString(
+          """test-parsed-2: value 1
+            | !!! not a header line !!!
+            |test-parsed-3: value 2
+          """.stripMargin
+        )
+      )
 
-      parsed.iterator.length should equal (2)
+      parsed.iterator.length should equal(2)
     }
 
     "stop reading headers at a blank line" in {
-      val parsed = Headers.parse(Source.fromString(
-        """test-parsed-4: value 1
-          |test-parsed-5: value 2
-          |test-parsed-6: value 3
-          |
-          |test-parsed-7: value 4
-        """.stripMargin
-      ))
+      val parsed = Headers.parse(
+        Source.fromString(
+          """test-parsed-4: value 1
+            |test-parsed-5: value 2
+            |test-parsed-6: value 3
+            |
+            |test-parsed-7: value 4
+          """.stripMargin
+        )
+      )
 
-      parsed.iterator.length should equal (3)
-      parsed.get("test-parsed-7") should equal (None)
+      parsed.iterator.length should equal(3)
+      parsed.get("test-parsed-7") should equal(None)
     }
   }
 
@@ -140,15 +157,15 @@ class HeadersSpec extends compose.Spec {
     "output multiple values when a header has multiple" in {
       val rendered = Headers(
         "test-render-1" -> "value 1",
-        "test-render-1" -> "value 2"
+        "test-render-1" -> "value 2",
       ).render
 
-      rendered.linesIterator.length should equal (2)
+      rendered.linesIterator.length should equal(2)
     }
 
     "capitalize the first letter of each header segment" in {
       val rendered = Headers("tEsT-rEnDeR-1" -> "value 1").render
-      rendered should equal ("Test-Render-1: value 1")
+      rendered should equal("Test-Render-1: value 1")
     }
   }
 }

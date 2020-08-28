@@ -10,7 +10,7 @@ class StringSpec extends compose.Spec {
 
       result shouldBe a[Renderer.Success]
       val encodedBytes = result.asInstanceOf[Renderer.Success].bodyStream.readAllBytes()
-      (new String(encodedBytes, "UTF-16")) should equal (testString)
+      (new String(encodedBytes, "UTF-16")) should equal(testString)
       (new String(encodedBytes, "UTF-8")) should not equal (testString)
     }
 
@@ -27,7 +27,7 @@ class StringSpec extends compose.Spec {
 
       result shouldBe a[Renderer.Success]
       val headers = result.asInstanceOf[Renderer.Success].defaultHeaders
-      headers.get("content-type").value should equal ("""text/plain; charset="UTF-16"""")
+      headers.get("content-type").value should equal("""text/plain; charset="UTF-16"""")
     }
 
     "report the content length properly" in {
@@ -37,7 +37,7 @@ class StringSpec extends compose.Spec {
       result shouldBe a[Renderer.Success]
       val headers = result.asInstanceOf[Renderer.Success].defaultHeaders
       val encodedBytes = result.asInstanceOf[Renderer.Success].bodyStream.readAllBytes()
-      headers.get("content-length").value should equal (encodedBytes.length.toString())
+      headers.get("content-length").value should equal(encodedBytes.length.toString())
       headers.get("content-length").value should not equal (testString.length.toString())
     }
   }
