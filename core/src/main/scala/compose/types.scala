@@ -17,9 +17,10 @@ import compose.http.attributes.{ AttrList, NoAttrs }
   * @tparam Body
   *   the type of the request body
   * @tparam Attrs
-  *   the types of the extended attributes the application expects. Generally, this is left
-  *   abstract, and the presence of specific attributes is asserted using implicit
-  *   [[compose.http.attributes.HasAttr]] parameters.
+  *   the types of the extended attributes the application expects. Generally, functions which
+  *   operate on applications don't fully specify the attribute type, but instead assert the
+  *   presence of specific relevant attributes by taking an implicit evidence parameter of type
+  *   [[compose.http.attributes.HasAttr]].
   */
 trait Application[-Body, -Attrs <: AttrList] extends (Request[Body, Attrs] => Future[Response])
 
