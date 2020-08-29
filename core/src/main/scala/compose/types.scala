@@ -7,19 +7,50 @@ import scala.concurrent.{ ExecutionContext, Future }
 import compose.http.{ Request, Response }
 import compose.http.attributes.{ AttrList, NoAttrs }
 
-// Principle: A web application is a function Request => Future[Response].
+/** A web application is a function mapping an HTTP request to an eventual HTTP response.
+  *
+  * `Application` is one of the fundamental types in compose. Generally, to build an application on
+  * the compose framework, the author will assemble an `Application[InputStream, NoAttrs]` by
+  * composing other types of `Application` with combinators or other functions that transform
+  * requests and responses.
+  *
+  * @tparam Body
+  *   the type of the request body
+  * @tparam Attrs
+  *   the types of the extended attributes the application expects. Generally, this is left
+  *   abstract, and the presence of specific attributes is asserted using implicit
+  *   [[compose.http.attributes.HasAttr]] parameters.
+  */
 trait Application[-Body, -Attrs <: AttrList] extends (Request[Body, Attrs] => Future[Response])
 
-// Principle: A web server is a function that takes in an application and does not return a value.
+/** A web server is a procedure that takes in a web application.
+  *
+  * A ''useful'' web server is one that reads HTTP requests from some source (generally a socket of
+  * some kind), uses its application to produce HTTP responses, and then writes those responses out
+  * somewhere.
+  *
+  * The server will end up creating requests with [[java.io.InputStream]] s as bodies and no
+  * extended attributes, so the application that it serves should have type
+  * `Application[InputStream, NoAttrs]`. That application may (and often in practice will) transform
+  * the request and delegate to other types of applications.
+  */
 trait Server extends (Application[InputStream, NoAttrs] => Unit) {
-  // Principle: A web server has a configuration.
+
+  /** The application configuration */
   val config: Config
 
-  // Principle: A web server creates an execution context.
+  /** The execution context the server provides for its application */
   implicit val executionContext: ExecutionContext
 
-  // Principle: A setup function takes the server's configuration and execution context and uses them to build an application.
-  // Principle: A server's boot method calls the setup function to build the application, then passes that application to the server function.
+  /** The server process entry point.
+    *
+    * `boot` calls `setupApplication` with the application config and the execution context, then
+    * calls the server function on the resulting application.
+    *
+    * @param setupApplication
+    *   a function which uses the configuration and execution context to build the application that
+    *   this server will serve
+    */
   def boot(
     setupApplication: Config => ExecutionContext => Application[InputStream, NoAttrs]
   ): Unit = {
