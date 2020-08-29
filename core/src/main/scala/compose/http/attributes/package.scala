@@ -1,5 +1,6 @@
 package compose.http
 
+/** Support for type-safe extended request attributes */
 package object attributes {
 
   type NoAttrs = NoAttrs.type
