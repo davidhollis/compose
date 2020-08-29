@@ -2,11 +2,11 @@ package compose.rendering
 
 import compose.http.Response.Renderer
 
-class StringSpec extends compose.Spec {
+class EncodedStringRendererSpec extends compose.Spec {
   "The string renderer" should {
     "encode the body properly" in {
       val testString = "test string rendering"
-      val result = implicits.encodedStringRenderer("UTF-16").render(testString)
+      val result = new EncodedStringRenderer("UTF-16").render(testString)
 
       result shouldBe a[Renderer.Success]
       val encodedBytes = result.asInstanceOf[Renderer.Success].bodyStream.readAllBytes()
@@ -16,14 +16,14 @@ class StringSpec extends compose.Spec {
 
     "handle invalid encoding names" in {
       val testString = "test failed string rendering"
-      val result = implicits.encodedStringRenderer("not a real encoding").render(testString)
+      val result = new EncodedStringRenderer("not a real encoding").render(testString)
 
       result shouldBe a[Renderer.Failure]
     }
 
     "insert a charset tag into the content-type header" in {
       val testString = "test charset rendering"
-      val result = implicits.encodedStringRenderer("UTF-16").render(testString)
+      val result = new EncodedStringRenderer("UTF-16").render(testString)
 
       result shouldBe a[Renderer.Success]
       val headers = result.asInstanceOf[Renderer.Success].defaultHeaders
@@ -32,7 +32,7 @@ class StringSpec extends compose.Spec {
 
     "report the content length properly" in {
       val testString = "test content-length"
-      val result = implicits.encodedStringRenderer("UTF-16").render(testString)
+      val result = new EncodedStringRenderer("UTF-16").render(testString)
 
       result shouldBe a[Renderer.Success]
       val headers = result.asInstanceOf[Renderer.Success].defaultHeaders
