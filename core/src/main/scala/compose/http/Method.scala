@@ -1,7 +1,6 @@
 package compose.http
 
-/** Represents an HTTP method as defined in RFC 2616. The list of all instances can be found in
-  * [[Method$]].
+/** An HTTP method as defined in RFC 2616. The list of all instances can be found in [[Method$]].
   *
   * @see
   *   RFC 2616: [[https://tools.ietf.org/html/rfc2616]]
