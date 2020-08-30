@@ -65,7 +65,7 @@ case class Request[+Body, +Attrs <: AttrList](
     */
   def withAttr[A](newAttr: Attr[A, NoAttrs.type]): Request[Body, Attr[A, Attrs]] =
     this.copy[Body, Attr[A, Attrs]](
-      extendedAttributes = newAttr.copy[A, Attrs](rest = extendedAttributes)
+      extendedAttributes = newAttr.addTo[Attrs](extendedAttributes)
     )
 
 }
