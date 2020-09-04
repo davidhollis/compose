@@ -5,14 +5,15 @@ import scala.io.Source
 /** A set of HTTP request or response headers.
   *
   * A header set is a collection of key/value pairs, where keys can be repeated (i.e., keys may have
-  * multiple values). Per [[https://tools.ietf.org/html/rfc2616RFC 2616]] (section 4.2), keys are
-  * '''case-insentive'''.
+  * multiple values). Per RFC 2616 (section 4.2), keys are '''case-insentive'''.
   *
   * @constructor
   *   Build a `Headers` directly from its internal representation. Generally, it's recommended to
   *   use [[Headers$.apply]] instead.
   * @param raw
   *   the underlying representation of the headers
+  * @see
+  *   RFC 2616: [[https://tools.ietf.org/html/rfc2616]]
   */
 case class Headers(raw: Map[String, Seq[String]]) {
 
