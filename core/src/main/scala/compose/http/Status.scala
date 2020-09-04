@@ -1,5 +1,9 @@
 package compose.http
 
+/** An HTTP response status
+  *
+  * The full list of instances can be found in [[Status$]].
+  */
 sealed abstract class Status(val code: Int, val reasonPhrase: String) {
   override lazy val toString: String = s"$code $reasonPhrase"
 }

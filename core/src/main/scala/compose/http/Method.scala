@@ -1,5 +1,10 @@
 package compose.http
 
+/** An HTTP method as defined in RFC 2616. The list of all instances can be found in [[Method$]].
+  *
+  * @see
+  *   RFC 2616: [[https://tools.ietf.org/html/rfc2616]]
+  */
 sealed abstract class Method(override val toString: String)
 
 object Method {
@@ -13,6 +18,7 @@ object Method {
   case object Trace extends Method("TRACE")
   case object Patch extends Method("PATCH")
 
+  /** The set of all methods. */
   lazy val all: Set[Method] = Set(
     Get,
     Head,
@@ -25,9 +31,17 @@ object Method {
     Patch,
   )
 
+  /** A map associating method names with their [[Method]] instances. */
   lazy val byName: Map[String, Method] =
     all.map { method => (method.toString -> method) }.toMap
 
+  /** Extract a [[Method]] from a string (method name).
+    *
+    * @param methodStr
+    *   a string, perhaps containing a method name
+    * @return
+    *   `Some(m: Method)` if `methodStr` was a method name; `None` if not.
+    */
   def unapply(methodStr: String): Option[Method] =
     byName.get(methodStr.toUpperCase)
 

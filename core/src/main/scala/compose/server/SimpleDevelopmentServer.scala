@@ -14,6 +14,21 @@ import compose.http.{ Request, Response, Status }
 import compose.http.attributes._
 import compose.rendering.implicits._
 
+/** A basic server implementation suitable for local development.
+  *
+  * '''Configuration'''
+  *
+  * The following options are supported:
+  *
+  *   - `numThreads`: the number of threads to spawn to respond to requests ''(default: 1)''
+  *   - `host`: the interface to listen on ''(default: 127.0.0.1)''
+  *   - `port`: the port to bind to ''(default: 8090)''
+  *   - `backlog`: the max connection backlog ''(default: 16)''
+  *
+  * @param config
+  *   the server and application configuration. The server config is expected to be under
+  *   `compose.server`.
+  */
 case class SimpleDevelopmentServer(config: Config) extends Server with StrictLogging {
 
   private val serverConfig: Config =
@@ -86,7 +101,7 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
 
 object SimpleDevelopmentServer {
 
-  def internalServerErrorResponse(err: Throwable): Response = {
+  private def internalServerErrorResponse(err: Throwable): Response = {
     val errBody = serializeError(err)
     Response[String](
       errBody,
@@ -94,7 +109,7 @@ object SimpleDevelopmentServer {
     )
   }
 
-  def serializeError(err: Throwable): String = {
+  private def serializeError(err: Throwable): String = {
     s"""
        |An error occurred while processing this request.
        |(If you're seeing this error in a production environment, please switch to the production server.)
@@ -103,7 +118,7 @@ object SimpleDevelopmentServer {
     """.stripMargin
   }
 
-  def renderThrowable(err: Throwable, root: Boolean = true): String = {
+  private def renderThrowable(err: Throwable, root: Boolean = true): String = {
     val prefix = if (!root) "Caused by: " else ""
     val base = s"${prefix}${err.toString()}\n"
     val trace = (for {
@@ -116,9 +131,9 @@ object SimpleDevelopmentServer {
     base + trace + causes
   }
 
-  val badRequestError: String = "Failed to parse HTTP request.\n"
+  private val badRequestError: String = "Failed to parse HTTP request.\n"
 
-  lazy val badRequestResponse: Future[Response] = Future.successful(
+  private lazy val badRequestResponse: Future[Response] = Future.successful(
     Response[String](
       SimpleDevelopmentServer.badRequestError,
       status = Status.BadRequest,
