@@ -2,13 +2,9 @@ name: Scala CI
 
 on:
   push:
-    branches:
-      - feature/**
-  pull_request:
-    branches:
-      - main
-      - develop
-      - release/**
+    branches-ignore:
+      - noci/**
+  pull_request: {}
 
 jobs:
   test:
