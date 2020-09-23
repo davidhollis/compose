@@ -2,7 +2,7 @@
 inThisBuild(
   Seq(
     scalaVersion := "2.13.2",
-    version := "0.1.0-SNAPSHOT",
+    version := "0.1.0",
     organization := "computer.hollis",
     organizationName := "hollis",
     organizationHomepage := Some(url("http://hollis.computer/")),
