@@ -1,13 +1,47 @@
-lazy val projectSettings = Seq(
-  scalaVersion := "2.13.2",
-  version := "0.1.0-SNAPSHOT",
-  organization := "computer.hollis",
-  organizationName := "hollis",
+// Project
+inThisBuild(
+  Seq(
+    scalaVersion := "2.13.2",
+    version := "0.1.0-SNAPSHOT",
+    organization := "computer.hollis",
+    organizationName := "hollis",
+    organizationHomepage := Some(url("http://hollis.computer/")),
+    description := "A functional web application framework for Scala",
+    licenses := List("BSD-3" -> new URL("https://github.com/davidhollis/compose/blob/main/LICENSE")),
+    homepage := Some(url("https://compose.hollis.computer/")),
+    scmInfo := Some(
+      ScmInfo(
+        url("https://github.com/davidhollis/compose"),
+        "scm:git@github.com:davidhollis/compose.git",
+      )
+    ),
+    developers := List(
+      Developer(
+        id = "hollis",
+        name = "David Hollis",
+        email = "david@davidhollis.net",
+        url = url("https://davidhollis.net/"),
+      )
+    ),
+  )
 )
 
+// Publishing and Signing
+ThisBuild / pgpSigningKey := Credentials
+  .forHost(credentials.value, s"${organization.value}.gpg")
+  .map(_.userName)
+ThisBuild / publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+ThisBuild / publishMavenStyle := true
+
 lazy val root = (project in file("."))
-  .settings(projectSettings)
   .settings(lintSettings)
+  .settings(skip in publish := true)
   .aggregate(core, demos)
   .dependsOn(core, demos)
 
@@ -23,7 +57,6 @@ lazy val core = (project in file("core"))
       "org.scalatest" %% "scalatest" % "3.1.1" % Test,
     ),
   )
-  .settings(projectSettings)
   .settings(lintSettings)
 
 lazy val demos = (project in file("demos"))
@@ -31,7 +64,6 @@ lazy val demos = (project in file("demos"))
   .settings(
     name := "compose-demos"
   )
-  .settings(projectSettings)
   .settings(lintSettings)
 
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
