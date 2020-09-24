@@ -21,5 +21,5 @@ package object json {
     * @tparam T the type to render as json
     * @return a renderer for `T`
     */
-  implicit def jsonRenderer[T: Writes] = new JsonRenderer[T]
+  implicit def jsonRenderer[T: Writes]: JsonRenderer[T] = new JsonRenderer[T]
 }
