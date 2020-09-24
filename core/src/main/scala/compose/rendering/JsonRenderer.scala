@@ -6,6 +6,11 @@ import play.api.libs.json.Writes
 import compose.http.Response.Renderer
 import compose.http.Headers
 
+/** Renders any object that's convertible into json into and HTTP response body
+  *
+  * @tparam T
+  *   the type of object to render
+  */
 class JsonRenderer[T: Writes] extends Renderer[T] {
 
   def render(body: T): Renderer.Result = {
