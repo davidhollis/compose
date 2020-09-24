@@ -87,6 +87,21 @@ object Response {
       *   the results of the render operation
       */
     def render(body: B): Renderer.Result
+
+    /** Create a new renderer for a type `T` by composing this one with a function
+      * of type `T => B`.
+      *
+      * @tparam T the type of the new renderer
+      * @param fn a function mapping values of type T into values this renderer can handle
+      * @return a new renderer of type `T`
+      */
+    def compose[T](fn: T => B): Renderer[T] = {
+      val outerRenderer = this
+      new Renderer[T] {
+        def render(body: T): Renderer.Result = outerRenderer.render(fn(body))
+      }
+    }
+
   }
 
   object Renderer {
