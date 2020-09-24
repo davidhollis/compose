@@ -54,6 +54,7 @@ lazy val core = (project in file("core"))
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
       "io.lemonlabs" %% "scala-uri" % "2.3.0",
+      "com.typesafe.play" %% "play-json" % "2.9.1",
       "org.scalatest" %% "scalatest" % "3.1.1" % Test,
     ),
   )
