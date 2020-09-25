@@ -89,4 +89,26 @@ class ResponseSpec extends compose.Spec {
       }
     }
   }
+
+  "Renderers" should {
+    "compose" in {
+      case class RenderCompositionTestCaseA(valueA: Int)
+      case class RenderCompositionTestCaseB(valueB: Int)
+
+      val testCaseARenderer = Response.Renderer[RenderCompositionTestCaseA] { rctca =>
+        Response.Renderer.Success(
+          Headers("test-value" -> rctca.valueA.toString()),
+          new ByteArrayInputStream(Array[Byte]()),
+        )
+      }
+      val testCaseBRenderer = testCaseARenderer.compose[RenderCompositionTestCaseB] { rctcb =>
+        RenderCompositionTestCaseA(rctcb.valueB * 2)
+      }
+
+      val result = testCaseBRenderer.render(RenderCompositionTestCaseB(5))
+      result shouldBe a[Response.Renderer.Success]
+      val headers = result.asInstanceOf[Response.Renderer.Success].defaultHeaders
+      headers.get("test-value").value should equal("10")
+    }
+  }
 }
