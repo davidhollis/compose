@@ -13,5 +13,5 @@ import compose.rendering.Renderer
   */
 package object implicits {
   implicit val stringRenderer: Renderer[String] = new EncodedStringRenderer("UTF-8")
-  implicit val twirlContentRenderer: Renderer[Content] = new EncodedTwirlContentRenderer("UTF-8")
+  implicit val twirlContentRenderer: Renderer[Content] = new TwirlContentRenderer
 }

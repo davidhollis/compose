@@ -1,20 +1,14 @@
 package compose.rendering
 
 import play.twirl.api.Content
+import compose.http.Headers
 
-class EncodedTwirlContentRenderer(encoding: String) extends Renderer[Content] {
-  private val baseRenderer = new EncodedStringRenderer(encoding)
+class TwirlContentRenderer(implicit stringRenderer: Renderer[String])
+    extends WrappedRenderer[Content, String](stringRenderer) {
 
-  def render(twirlContent: Content): Renderer.Result = {
-    val baseResult = baseRenderer.render(twirlContent.body)
-    baseResult match {
-      case Renderer.Success(defaultHeaders, bodyStream) =>
-        Renderer.Success(
-          defaultHeaders.replace("Content-Type" -> twirlContent.contentType),
-          bodyStream,
-        )
-      case failure: Renderer.Failure => failure
-    }
-  }
+  def transformBody(twirlContent: Content): String = twirlContent.body
+
+  def transformHeaders(twirlContent: Content, initialHeaders: Headers): Headers =
+    initialHeaders.replace("Content-Type" -> twirlContent.contentType)
 
 }
