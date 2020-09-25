@@ -3,7 +3,6 @@ package compose.rendering
 import java.io.ByteArrayInputStream
 import scala.util.{ Failure, Success, Try }
 
-import compose.http.Response.Renderer
 import compose.http.Headers
 
 /** Renders a string into an HTTP response body, using a specific encoding.

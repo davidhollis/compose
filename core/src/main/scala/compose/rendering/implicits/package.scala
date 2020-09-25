@@ -1,6 +1,8 @@
 package compose.rendering
 
-import compose.http.Response.Renderer
+import play.twirl.api.Content
+
+import compose.rendering.Renderer
 
 /** Convenience package with a collection of implicit renderers
   *
@@ -11,4 +13,5 @@ import compose.http.Response.Renderer
   */
 package object implicits {
   implicit val stringRenderer: Renderer[String] = new EncodedStringRenderer("UTF-8")
+  implicit val twirlContentRenderer: Renderer[Content] = new EncodedTwirlContentRenderer("UTF-8")
 }

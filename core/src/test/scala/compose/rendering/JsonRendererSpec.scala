@@ -2,8 +2,6 @@ package compose.rendering
 
 import play.api.libs.json._
 
-import compose.http.Response.Renderer
-
 class JsonRendererSpec extends compose.Spec {
 
   "The JSON renderer" should {
