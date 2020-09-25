@@ -1,7 +1,5 @@
 package compose.rendering
 
-import compose.http.Response.Renderer
-
 class EncodedStringRendererSpec extends compose.Spec {
   "The string renderer" should {
     "encode the body properly" in {

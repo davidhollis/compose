@@ -2,6 +2,8 @@ package compose.http
 
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
+import compose.rendering.Renderer
+
 class ResponseSpec extends compose.Spec {
   "The response writer" should {
     "write out a response, with body" in {
@@ -38,14 +40,14 @@ class ResponseSpec extends compose.Spec {
 
   "The response builder" when {
     case class BuilderTestCase(good: Boolean)
-    val testCaseRenderer = Response.Renderer[BuilderTestCase](tc =>
+    val testCaseRenderer = Renderer[BuilderTestCase](tc =>
       if (tc.good)
-        Response.Renderer.Success(
+        Renderer.Success(
           Headers("test-header-1" -> "default value 1", "test-header-2" -> "default value 2"),
           new ByteArrayInputStream(Array[Byte]()),
         )
       else
-        Response.Renderer.Failure("Testing rendering failure")
+        Renderer.Failure("Testing rendering failure")
     )
 
     "rendering succeeds" should {
@@ -87,28 +89,6 @@ class ResponseSpec extends compose.Spec {
 
         resp.status should equal(Status.InternalServerError)
       }
-    }
-  }
-
-  "Renderers" should {
-    "compose" in {
-      case class RenderCompositionTestCaseA(valueA: Int)
-      case class RenderCompositionTestCaseB(valueB: Int)
-
-      val testCaseARenderer = Response.Renderer[RenderCompositionTestCaseA] { rctca =>
-        Response.Renderer.Success(
-          Headers("test-value" -> rctca.valueA.toString()),
-          new ByteArrayInputStream(Array[Byte]()),
-        )
-      }
-      val testCaseBRenderer = testCaseARenderer.compose[RenderCompositionTestCaseB] { rctcb =>
-        RenderCompositionTestCaseA(rctcb.valueB * 2)
-      }
-
-      val result = testCaseBRenderer.render(RenderCompositionTestCaseB(5))
-      result shouldBe a[Response.Renderer.Success]
-      val headers = result.asInstanceOf[Response.Renderer.Success].defaultHeaders
-      headers.get("test-value").value should equal("10")
     }
   }
 }

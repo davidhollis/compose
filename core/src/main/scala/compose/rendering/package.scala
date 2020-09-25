@@ -30,11 +30,10 @@ package compose
   * === Custom Rendering ===
   *
   * If you need to provide a custom renderer for a particular type, you can either subclass
-  * [[compose.http.Response.Renderer]] or compose a function with an existing renderer:
+  * [[Renderer]] or compose a function with an existing renderer:
   *
   * {{{
-  * import compose.http.Response.Renderer
-  * import compose.rendering.EncodedStringRenderer
+  * import compose.rendering.{ Renderer, EncodedStringRenderer }
   *
   * case class User(name: String, email: String) {
   *   def obfuscatedEmail: String = ???
@@ -74,6 +73,6 @@ package compose
   * // val res3: Array[Byte] = Array(-2, -1, 0, 72, 0, 101, 0, 108, 0, 108, 0, 111, 0, 33)
   * }}}
   *
-  * @see [[compose.http.Response.Renderer]]
+  * @see [[Renderer]]
   */
 package object rendering {}

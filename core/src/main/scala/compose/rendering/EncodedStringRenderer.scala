@@ -3,7 +3,6 @@ package compose.rendering
 import java.io.ByteArrayInputStream
 import scala.util.{ Failure, Success, Try }
 
-import compose.http.Response.Renderer
 import compose.http.Headers
 
 /** Renders a string into an HTTP response body, using a specific encoding.
@@ -11,7 +10,7 @@ import compose.http.Headers
   * @param encoding
   *   the encoding to use
   */
-class EncodedStringRenderer(encoding: String) extends Renderer[String] {
+class EncodedStringRenderer(val encoding: String) extends Renderer[String] {
 
   def render(bodyStr: String): Renderer.Result = {
     Try(bodyStr.getBytes(encoding)) match {
