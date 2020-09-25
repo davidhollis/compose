@@ -10,7 +10,7 @@ import compose.http.Headers
   * @param encoding
   *   the encoding to use
   */
-class EncodedStringRenderer(encoding: String) extends Renderer[String] {
+class EncodedStringRenderer(val encoding: String) extends Renderer[String] {
 
   def render(bodyStr: String): Renderer.Result = {
     Try(bodyStr.getBytes(encoding)) match {
