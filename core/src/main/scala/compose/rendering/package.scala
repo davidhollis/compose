@@ -44,7 +44,7 @@ package compose
   *   // EncodedStringRenderer is a Renderer[String], so we can compose it with a function
   *   // of type User => String to get a Renderer[User]
   *   implicit val renderer: Renderer[User] = new EncodedStringRenderer("UTF-8").compose { u =>
-  *     s"""User: "${u.name}" <${u.obfuscatedEmail}>"""
+  *     s"""User: "\${u.name}" <\${u.obfuscatedEmail}>"""
   *   }
   * }
   * }}}
