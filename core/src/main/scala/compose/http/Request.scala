@@ -52,6 +52,18 @@ case class Request[+Body, +Attrs <: AttrList](
     */
   def mapBody[T](f: Body => T): Request[T, Attrs] = this.copy(body = f(body))
 
+  /** Transform the extended attributes of this request by applying a function to them.
+    *
+    * @tparam A
+    *   the new attribute list type
+    * @param f
+    *   the function to apply to the attributes
+    * @return
+    *   a request identical to this one except for the attributes
+    */
+  def mapAttrs[A <: AttrList](f: Attrs => A): Request[Body, A] =
+    this.copy(extendedAttributes = f(extendedAttributes))
+
   /** Attach an extended attribute of type `A` to this request.
     *
     * @tparam A
