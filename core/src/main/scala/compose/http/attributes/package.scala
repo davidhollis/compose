@@ -1,56 +1,40 @@
 package compose.http
 
-// format: off
 /** Support for type-safe extended request attributes.
   *
-  * =Examples=
+  * = Examples: =
   *
-  * ==Creating an attribute tag==
+  * == Creating an attribute key ==
   * {{{
   * import compose.html.attributes._
   * import javax.security.auth.x500.X500Principal
   *
-  * object ClientCertPrincipal extends AttrTag[X500Principal]("client cert principal")
+  * object ClientCertPrincipal extends AttrKey[X500Principal]("client cert principal")
   * }}}
   *
-  * ==Adding a tagged attribute to a request==
+  * == Adding a keyed attribute to a request ==
   * {{{
   * import compose.html._
   * import compose.rendering.implicits._
-  * import scala.util.{ Try, Either, Left, Right }
+  * import scala.util.{ Either, Left, Right }
   *
-  * def requireX500Header[B, A](
-  *   req: Request[B, A]
-  * ): Either[Response, Request[B, Attr[X500Principal, A]]] =
-  *   req.headers
-  *     .get("X-Client-Cert-Principal")
-  *     .flatMap { principal => Try(new X500Principal(principal)).toOption }
-  *     .fold {
-  *       // If we don't find or can't parse the header, send back an error response
-  *       Left(Response(
-  *         "Missing or invalid client cert principal",
-  *         status = Status.BadRequest,
-  *       ))
-  *     } { (principal: X500Principal) =>
-  *       // If we find a valid header, attach it to the request and keep going
-  *       Right(req.withAttr(ClientCertPrincipal ~> principal))
-  *     }
+  * def requireX500Header[B](req: Request[B]): Either[Response, Request[B]] =
+  *   extractX500Principal(req.headers) match {
+  *     case Some(principal) => Right(req.withAttr(ClientCertPrincipal -> principal))
+  *     case None            => Left(errorResponse())
+  *   }
+  * }
   * }}}
   *
-  * There are two important things to note in the above:
+  * The expression '''`req.withAttr(ClientCertPrincipal -> principal)`''' is what's actually adding
+  * the attribute.
   *
-  *   1. In the type '''`Request[B, Attr[X500Principal, A]]`''', the inner type '''`Attr[X500Principal, A]`'''
-  *      can be read as "An attribute set with an `X500Principal` and the rest of the attributes in
-  *      the set `A`".
-  *   1. The expression '''`req.withAttr(ClientCertPrincipal ~> principal)`''' is what's actually adding
-  *      the attribute.
-  *
-  * ==Getting an attribute out directly with its tag==
+  * == Getting an attribute directly ==
   * {{{
-  * req.extendedAttributes(ClientCertPrincipal) // : Option[X500Principal]
+  * req.extendedAttributes.get(ClientCertPrincipal) // : Option[X500Principal]
   * }}}
   *
-  * ==Getting an attribute out by pattern matching==
+  * == Getting a single attribute by pattern matching ==
   * {{{
   * req match {
   *   case Request(_, _, _, _, _, ClientCertPrincipal(principal)) =>
@@ -59,21 +43,34 @@ package compose.http
   * }
   * }}}
   *
-  * ==Using implicits to require a certain type of attribute==
+  * == Getting multiple attributes at the same time by pattern matching ==
   * {{{
-  * def checkAuthorized[B, A](
-  *   req: Request[B, A]
-  * )(
-  *   implicit
-  *   hasCert: A HasAttr X500Principal // syntactic sugar for HasAttr[A, X500Principal]
-  * ): Boolean = ???
+  * req match {
+  *   case Request(_, _, _, _, _, ClientCertPrincipal(principal) :@: SomeOtherKey(anotherValue)) =>
+  *     doSomethingElseWith(principal, anotherValue)
+  *   // ...
+  * }
   * }}}
   */
 package object attributes {
-  // format: on
 
+  /** Extension class for combining two typed key-value pairs into an [[AttrMap]].
+    *
+    * This operator is right-associative: if both pairs have the same key, the resulting map will
+    * contain the value from the lefthand pair.
+    *
+    * @constructor
+    * @tparam T1 The type of the righthand value
+    * @param kv1 The righthand key-value pair
+    */
   implicit class AttrMapBuilder[T1](kv1: (AttrKey[T1], T1)) {
 
+    /** Combine the righthand key-value pair with the given lefthand pair.
+      *
+      * @tparam T2 The type of the lefthand value
+      * @param kv2 The lefthand key-value pair
+      * @return The combined map
+      */
     def :@:[T2](kv2: (AttrKey[T2], T2)): AttrMap =
       (new AttrMap) + kv1 + kv2
 
