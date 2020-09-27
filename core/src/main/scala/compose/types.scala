@@ -9,9 +9,9 @@ import compose.http.{ Request, Response }
 /** A web application is a function mapping an HTTP request to an eventual HTTP response.
   *
   * `Application` is one of the fundamental types in compose. Generally, to build an application on
-  * the compose framework, the author will assemble an `Application[InputStream, NoAttrs]` by
-  * composing other types of `Application` with combinators or other functions that transform
-  * requests and responses.
+  * the compose framework, the author will assemble an `Application[InputStream]` by composing
+  * other types of `Application` with combinators or with other functions that transform requests
+  * and responses.
   *
   * @tparam Body
   *   the type of the request body
@@ -24,10 +24,9 @@ trait Application[-Body] extends (Request[Body] => Future[Response])
   * some kind), uses its application to produce HTTP responses, and then writes those responses out
   * somewhere.
   *
-  * The server will end up creating requests with [[java.io.InputStream]] s as bodies and no
-  * extended attributes, so the application that it serves should have type
-  * `Application[InputStream, NoAttrs]`. That application may (and often in practice will) transform
-  * the request and delegate to other types of applications.
+  * The server will end up creating requests with [[java.io.InputStream]]s as bodies, so the
+  * application that it serves should have type `Application[InputStream]`. That application may
+  * (and often in practice will) transform the request and delegate to other types of applications.
   */
 trait Server extends (Application[InputStream] => Unit) {
 

@@ -8,8 +8,7 @@ import compose.http.attributes.{ AttrKey, AttrMap }
 
 /** An HTTP request with typed body and optional extended attributes.
   *
-  * Requests intially have a body of type [[java.io.InputStream]] and attribute type of
-  * [[compose.http.attributes.NoAttrs]] (that is, they have no extended attributes). Body parsers or
+  * Requests intially have a body of type [[java.io.InputStream]]. Body parsers or
   * other middleware may convert such requests into [[Request]] s of other types.
   *
   * @tparam Body
