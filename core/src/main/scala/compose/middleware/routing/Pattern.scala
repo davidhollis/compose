@@ -2,8 +2,11 @@ package compose.middleware.routing
 
 import compose.http.Request
 import compose.http.RequestTarget
+import compose.Application
 
-trait Pattern[Body] extends (Request[Body] => Pattern.MatchResult[Body])
+trait Pattern[Body] extends (Request[Body] => Pattern.MatchResult[Body]) {
+  def |->(app: Application[Body]): Rule[Body] = new PatternRule[Body](this, app)
+}
 
 class UnconditionalPattern[Body] extends Pattern[Body] {
   def apply(req: Request[Body]): Pattern.MatchResult[Body] = Pattern.Match(req)
