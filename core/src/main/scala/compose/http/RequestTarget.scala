@@ -38,6 +38,8 @@ object RequestTarget {
     */
   final case class Path(path: String, queryParams: Map[String, Seq[String]]) extends RequestTarget {
 
+    def isRoot: Boolean = (path == "") || (path == "/")
+
     /** Construct a string that expresses the same path as this.
       *
       * Note that because order of arguments is somewhat arbitrary, this may not produce the exact

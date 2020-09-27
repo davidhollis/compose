@@ -4,7 +4,7 @@ import java.io.InputStream
 import scala.io.Source
 import scala.util.matching.Regex
 
-import compose.http.attributes.{ Attr, AttrList, NoAttrs }
+import compose.http.attributes.{ AttrKey, AttrMap }
 
 /** An HTTP request with typed body and optional extended attributes.
   *
@@ -14,11 +14,6 @@ import compose.http.attributes.{ Attr, AttrList, NoAttrs }
   *
   * @tparam Body
   *   the type of the request body
-  * @tparam Attrs
-  *   the types of all extended attributes. Generally, functions which operate on requests don't
-  *   fully specify the attribute type, but instead assert the presence of specific relevant
-  *   attributes by taking an implicit evidence parameter of type
-  *   [[compose.http.attributes.HasAttr]].
   * @param version
   *   the HTTP version the client who wrote this request speaks
   * @param method
@@ -32,13 +27,13 @@ import compose.http.attributes.{ Attr, AttrList, NoAttrs }
   * @param extendedAttributes
   *   any additional attributes attached to this request by middleware
   */
-case class Request[+Body, +Attrs <: AttrList](
+case class Request[+Body](
   version: Version,
   method: Method,
   target: RequestTarget,
   headers: Headers,
   body: Body,
-  extendedAttributes: Attrs,
+  extendedAttributes: AttrMap,
 ) {
 
   /** Transform the body of this request by applying a function to it.
@@ -50,19 +45,7 @@ case class Request[+Body, +Attrs <: AttrList](
     * @return
     *   a request identical to this one except for the body
     */
-  def mapBody[T](f: Body => T): Request[T, Attrs] = this.copy(body = f(body))
-
-  /** Transform the extended attributes of this request by applying a function to them.
-    *
-    * @tparam A
-    *   the new attribute list type
-    * @param f
-    *   the function to apply to the attributes
-    * @return
-    *   a request identical to this one except for the attributes
-    */
-  def mapAttrs[A <: AttrList](f: Attrs => A): Request[Body, A] =
-    this.copy(extendedAttributes = f(extendedAttributes))
+  def mapBody[T](f: Body => T): Request[T] = this.copy(body = f(body))
 
   /** Attach an extended attribute of type `A` to this request.
     *
@@ -75,10 +58,8 @@ case class Request[+Body, +Attrs <: AttrList](
     * @see
     *   [[compose.http.attributes]]
     */
-  def withAttr[A](newAttr: Attr[A, NoAttrs.type]): Request[Body, Attr[A, Attrs]] =
-    this.copy[Body, Attr[A, Attrs]](
-      extendedAttributes = newAttr.addTo[Attrs](extendedAttributes)
-    )
+  def withAttr[A](newAttr: (AttrKey[A], A)): Request[Body] =
+    this.copy(extendedAttributes = extendedAttributes + newAttr)
 
 }
 
@@ -101,7 +82,7 @@ object Request {
     * @see
     *   RFC 2047: [[https://tools.ietf.org/html/rfc2047]]
     */
-  def parse(inputStream: InputStream): Option[Request[InputStream, NoAttrs]] = {
+  def parse(inputStream: InputStream): Option[Request[InputStream]] = {
     val headSection = RequestHeadReader.readHeading(inputStream)
     val headerSource = Source.fromString(headSection)
     headerSource.getLines().next match {
@@ -114,7 +95,7 @@ object Request {
             RequestTarget.parse(targetString),
             headers,
             body = inputStream,
-            extendedAttributes = NoAttrs,
+            extendedAttributes = AttrMap(),
           )
         )
       }

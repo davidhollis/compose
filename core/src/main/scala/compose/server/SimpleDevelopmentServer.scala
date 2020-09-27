@@ -11,7 +11,6 @@ import scala.util.{ Failure, Success }
 
 import compose.{ Application, Server }
 import compose.http.{ Request, Response, Status }
-import compose.http.attributes._
 import compose.rendering.implicits._
 
 /** A basic server implementation suitable for local development.
@@ -49,7 +48,7 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
       "scalafix:DisableSyntax.while"
     )
   )
-  def apply(application: Application[InputStream, NoAttrs]): Unit = {
+  def apply(application: Application[InputStream]): Unit = {
     val socket = new ServerSocket(
       serverConfig.getAs[Int]("port").getOrElse(8090),
       serverConfig.getAs[Int]("backlog").getOrElse(16),
@@ -61,7 +60,7 @@ case class SimpleDevelopmentServer(config: Config) extends Server with StrictLog
 
     while (true) {
       val connection = socket.accept()
-      Future[Option[Request[InputStream, NoAttrs]]] {
+      Future[Option[Request[InputStream]]] {
         logger.debug("Received request. Validating.")
         Request.parse(connection.getInputStream())
       }.flatMap {

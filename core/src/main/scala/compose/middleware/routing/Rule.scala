@@ -2,19 +2,18 @@ package compose.middleware.routing
 
 import scala.concurrent.Future
 
-import compose.http.attributes.AttrList
 import compose.http.{ Request, Response }
 import compose.http.Status.NotFound
 import compose.rendering.implicits._
 import compose.Application
 
-trait Rule[-Body, -Attrs <: AttrList] extends Application[Body, Attrs] {
-  def orElse[BB <: Body, AA <: Attrs](alternateRule: Rule[BB, AA]): Rule[BB, AA]
+trait Rule[Body] extends Application[Body] {
+  def orElse(alternateRule: Rule[Body]): Rule[Body]
 }
 
-class NoMatchRule[-Body, -Attrs <: AttrList] private[routing] () extends Rule[Body, Attrs] {
+class NoMatchRule[Body] private[routing] () extends Rule[Body] {
 
-  def apply(request: Request[Body, Attrs]): Future[Response] =
+  def apply(request: Request[Body]): Future[Response] =
     Future.successful(
       Response(
         s"Not found: ${request.method} ${request.target}",
@@ -22,24 +21,23 @@ class NoMatchRule[-Body, -Attrs <: AttrList] private[routing] () extends Rule[Bo
       )
     )
 
-  def orElse[BB <: Body, AA <: Attrs](alternateRule: Rule[BB, AA]): Rule[BB, AA] = this
+  def orElse(alternateRule: Rule[Body]): Rule[Body] = this
 
 }
 
-class PatternRule[-Body, -Attrs <: AttrList, -InnerAttrs <: AttrList] private[routing] (
-  pattern: Pattern[Body, Attrs],
-  app: Application[Body, InnerAttrs],
-  augment: RoutingParams => Attrs => InnerAttrs,
-  alternateRule: Rule[Body, Attrs] = new NoMatchRule,
-) extends Rule[Body, Attrs] {
+class PatternRule[Body] private[routing] (
+  pattern: Pattern[Body],
+  app: Application[Body],
+  alternateRule: Rule[Body] = new NoMatchRule[Body],
+) extends Rule[Body] {
 
-  def apply(request: Request[Body, Attrs]): Future[Response] =
+  def apply(request: Request[Body]): Future[Response] =
     pattern(request) match {
-      case Pattern.Match(matchParams) => app(request.mapAttrs[InnerAttrs](augment(matchParams)))
-      case Pattern.NoMatch            => alternateRule(request)
+      case Pattern.Match(updatedRequest) => app(updatedRequest)
+      case Pattern.NoMatch               => alternateRule(request)
     }
 
-  def orElse[BB <: Body, AA <: Attrs](newAlternateRule: Rule[BB, AA]): Rule[BB, AA] =
-    new PatternRule[BB, AA, InnerAttrs](pattern, app, augment, newAlternateRule)
+  def orElse(newAlternateRule: Rule[Body]): Rule[Body] =
+    new PatternRule[Body](pattern, app, newAlternateRule)
 
 }

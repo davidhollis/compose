@@ -5,7 +5,6 @@ import java.io.InputStream
 import scala.concurrent.{ ExecutionContext, Future }
 
 import compose.http.{ Request, Response }
-import compose.http.attributes.{ AttrList, NoAttrs }
 
 /** A web application is a function mapping an HTTP request to an eventual HTTP response.
   *
@@ -16,13 +15,8 @@ import compose.http.attributes.{ AttrList, NoAttrs }
   *
   * @tparam Body
   *   the type of the request body
-  * @tparam Attrs
-  *   the types of the extended attributes the application expects. Generally, functions which
-  *   operate on applications don't fully specify the attribute type, but instead assert the
-  *   presence of specific relevant attributes by taking an implicit evidence parameter of type
-  *   [[compose.http.attributes.HasAttr]].
   */
-trait Application[-Body, -Attrs <: AttrList] extends (Request[Body, Attrs] => Future[Response])
+trait Application[-Body] extends (Request[Body] => Future[Response])
 
 /** A web server is a procedure that takes in a web application.
   *
@@ -35,7 +29,7 @@ trait Application[-Body, -Attrs <: AttrList] extends (Request[Body, Attrs] => Fu
   * `Application[InputStream, NoAttrs]`. That application may (and often in practice will) transform
   * the request and delegate to other types of applications.
   */
-trait Server extends (Application[InputStream, NoAttrs] => Unit) {
+trait Server extends (Application[InputStream] => Unit) {
 
   /** The application configuration */
   val config: Config
@@ -53,7 +47,7 @@ trait Server extends (Application[InputStream, NoAttrs] => Unit) {
     *   this server will serve
     */
   def boot(
-    setupApplication: Config => ExecutionContext => Application[InputStream, NoAttrs]
+    setupApplication: Config => ExecutionContext => Application[InputStream]
   ): Unit = {
     val application = setupApplication(config)(executionContext)
     this(application)

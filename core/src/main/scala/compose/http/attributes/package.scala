@@ -72,29 +72,11 @@ package compose.http
 package object attributes {
   // format: on
 
-  /** Type alias to avoid having to write `NoAttrs.type` all over the place. */
-  type NoAttrs = NoAttrs.type
+  implicit class AttrMapBuilder[T1](kv1: (AttrKey[T1], T1)) {
 
-  /** Extension class to add a `~>` operator to [[AttrTag]].
-    *
-    * Breaking this out into an extension class is necessary to allow `AttrTag` to remain covariant
-    * in its type parameter.
-    *
-    * @tparam T
-    *   the type of the value being associated with this tag
-    * @param attrTag
-    *   the tag being associated with a value
-    */
-  implicit class AttrPairArrow[T](attrTag: AttrTag[T]) {
+    def :@:[T2](kv2: (AttrKey[T2], T2)): AttrMap =
+      (new AttrMap) + kv1 + kv2
 
-    /** Associate this tag with the given value.
-      *
-      * @param value
-      *   the value to associate with this tag
-      * @return
-      *   an attribute set containing only this tagged value
-      */
-    def ~>(value: T): Attr[T, NoAttrs] = Attr(attrTag, value, NoAttrs)
   }
 
 }

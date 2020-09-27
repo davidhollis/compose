@@ -1,31 +1,27 @@
 package compose.middleware.routing
 
-import compose.http.attributes.AttrList
 import compose.http.Request
-import compose.http.attributes.AttrTag
+import compose.http.RequestTarget
 
-trait Pattern[-Body, -Attrs <: AttrList] extends (Request[Body, Attrs] => Pattern.MatchResult)
+trait Pattern[Body] extends (Request[Body] => Pattern.MatchResult[Body])
 
-object Pattern {
-  sealed trait MatchResult
-
-  case object NoMatch extends MatchResult
-  case class Match(params: RoutingParams) extends MatchResult
+class UnconditionalPattern[Body] extends Pattern[Body] {
+  def apply(req: Request[Body]): Pattern.MatchResult[Body] = Pattern.Match(req)
 }
 
-sealed trait RoutingParam
+class RootPathPattern[Body] extends Pattern[Body] {
 
-object RoutingParams extends AttrTag[RoutingParams]("routing parameters") {
+  def apply(req: Request[Body]): Pattern.MatchResult[Body] =
+    req match {
+      case Request(_, _, path: RequestTarget.Path, _, _, _) if path.isRoot => Pattern.Match(req)
+      case _                                                               => Pattern.NoMatch
+    }
 
-  def merge(
-    params1: RoutingParams,
-    params2: RoutingParams,
-  ): RoutingParams = {
-    (
-      for {
-        key <- params1.keySet union params2.keySet
-      } yield (key -> (params1.getOrElse(key, Seq.empty) ++ params2.getOrElse(key, Seq.empty)))
-    ).toMap
-  }
+}
 
+object Pattern {
+  sealed trait MatchResult[+Body]
+
+  case object NoMatch extends MatchResult[Nothing]
+  case class Match[+Body](enrichedRequest: Request[Body]) extends MatchResult[Body]
 }
