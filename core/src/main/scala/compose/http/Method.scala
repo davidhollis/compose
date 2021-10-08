@@ -5,7 +5,9 @@ package compose.http
   * @see
   *   RFC 2616: [[https://tools.ietf.org/html/rfc2616]]
   */
-sealed abstract class Method(override val toString: String)
+sealed abstract class Method(override val toString: String) {
+  def unapply(req: Request[_]): Boolean = req.method == this
+}
 
 object Method {
   case object Get extends Method("GET")
